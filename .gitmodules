@@ -1,0 +1,3 @@
+[submodule "dalle-playground"]
+	path = dalle-playground
+	url = git@github.com:saharmor/dalle-playground.git
