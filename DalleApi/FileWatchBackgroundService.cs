@@ -15,11 +15,11 @@ public class FileWatchBackgroundService : BackgroundService
     private readonly BlockingCollection<CreatedFileEvent> _blockingCollection;
     private TimeSpan _delayTime;
 
-    public FileWatchBackgroundService(ILogger<FileWatchBackgroundService> logger, IOptionsMonitor<DalleApiOptions> optionsMonitor)
+    public FileWatchBackgroundService(ILogger<FileWatchBackgroundService> logger, IOptionsMonitor<FileWatcherOptions> optionsMonitor)
     {
         _logger = logger;
-        _fileSaveLocation = optionsMonitor.CurrentValue.SaveLocation.AbsolutePath;
         _blockingCollection = new BlockingCollection<CreatedFileEvent>();
+        _fileSaveLocation = optionsMonitor.CurrentValue.ImageSaveLocation.AbsolutePath;
         _delayTime = TimeSpan.FromSeconds(optionsMonitor.CurrentValue.FailedLoopDelayInSec);
     }
 
@@ -70,7 +70,9 @@ public class FileWatchBackgroundService : BackgroundService
     }
 }
 
-public record DalleApiOptions(Uri SaveLocation, int FailedLoopDelayInSec);
+public record FileWatcherOptions(int FailedLoopDelayInSec, int MaxLoopDelay, Uri ImageSaveLocation);
+
+public record DalleApiOptions(Uri ImageApiGrpcSocket);
 public record CreatedFileEvent(Guid RequestId, Uri FilePath);
 
 public record DalleApiImageCreated(Guid RequestId,  Guid ImageId, Uri FileLocation);
