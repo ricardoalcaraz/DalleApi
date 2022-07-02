@@ -1,4 +1,4 @@
-namespace DalleProxy;
+namespace DalleApi;
 
 public class ImageWatcherService : IDisposable
 {

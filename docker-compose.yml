@@ -1,0 +1,27 @@
+version: '3'
+
+volumes:
+  app-cache:
+    driver: local
+
+services:
+  dalle-backend:
+    container_name: dalle-backend
+    build:
+      context: ./dalle-playground/backend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 8080:8080
+    volumes:
+      - app-cache:/root/.cache
+      - ${img_save_path}:/img
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [ gpu ]
+  postgres_dev_db:
+    container_name: postgres_dev
+    image: postgres:latest
+    restart: unless-stopped
