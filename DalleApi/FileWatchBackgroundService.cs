@@ -1,26 +1,22 @@
-using System.Collections.Concurrent;
-using System.Net.Mime;
+using System.Threading.Channels;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp;
 
 namespace DalleApi;
 
-/// <summary>
-/// 
-/// </summary>
 public class FileWatchBackgroundService : BackgroundService
 {
     private readonly ILogger<FileWatchBackgroundService> _logger;
     private readonly string _fileSaveLocation;
-    private readonly BlockingCollection<CreatedFileEvent> _blockingCollection;
     private TimeSpan _delayTime;
+    private readonly Channel<CreatedFileEvent> _channel;
 
     public FileWatchBackgroundService(ILogger<FileWatchBackgroundService> logger, IOptionsMonitor<FileWatcherOptions> optionsMonitor)
     {
         _logger = logger;
-        _blockingCollection = new BlockingCollection<CreatedFileEvent>();
         _fileSaveLocation = optionsMonitor.CurrentValue.ImageSaveLocation.AbsolutePath;
         _delayTime = TimeSpan.FromSeconds(optionsMonitor.CurrentValue.FailedLoopDelayInSec);
+        _channel = Channel.CreateUnbounded<CreatedFileEvent>();
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -33,7 +29,7 @@ public class FileWatchBackgroundService : BackgroundService
                 _logger.LogInformation("Starting File Watcher Service");
                 using var fileSystemWatcher = new FileSystemWatcher(_fileSaveLocation);
 
-                foreach (var fileCreatedEvent in _blockingCollection.GetConsumingEnumerable(stoppingToken))
+                await foreach (var fileCreatedEvent in _channel.Reader.ReadAllAsync(stoppingToken).WithCancellation(stoppingToken))
                 {
                     _logger.LogInformation("Processing {File}", fileCreatedEvent);
                     await using (var file = File.Open(fileCreatedEvent.FilePath.AbsolutePath, FileMode.Open))
@@ -66,7 +62,10 @@ public class FileWatchBackgroundService : BackgroundService
     {
         var requestId = Guid.Parse(e.FullPath.Split('.')[0]);
         var createdFileEvent = new CreatedFileEvent(requestId, new Uri(e.FullPath));
-        _blockingCollection.Add(createdFileEvent);
+        if (_channel.Writer.TryWrite(createdFileEvent))
+        {
+            _logger.LogDebug("Successful file event write");
+        }
     }
 }
 
