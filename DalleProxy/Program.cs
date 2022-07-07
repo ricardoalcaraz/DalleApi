@@ -39,7 +39,7 @@ var pong = await db.PingAsync();
 await db.PublishAsync(new RedisChannel(publishName, RedisChannel.PatternMode.Auto), new RedisValue("test"),CommandFlags.FireAndForget);
 
 
-var imageResponse = await client.GetImageAsync(new TextRequest{Prompt = "Dali painting of WALL·E", Num = Random.Shared.Next()});
+var imageResponse = await client.GetImageAsync(new TextRequest{Prompt = "Dali painting of WALL·E", Seed = Random.Shared.Next()});
 
 // Configure the HTTP request pipeline.
 app.MapGrpcService<GreeterService>();
