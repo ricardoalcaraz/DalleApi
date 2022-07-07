@@ -11,4 +11,10 @@
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="StackExchange.Redis">
+        <HintPath>..\..\.nuget\packages\stackexchange.redis\2.5.61\lib\net5.0\StackExchange.Redis.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>
