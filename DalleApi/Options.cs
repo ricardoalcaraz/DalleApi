@@ -8,7 +8,8 @@ public record RedisOptions
     
     [Required] public string? StreamName { get; init; } = "dalle_stream";
     [Required] public string? DalleStream { get; init; } = "dalle_stream";
-    [Required] public string? TextPromptStream { get; init; } = "text_prompt";
+    [Required] public string? ImageField { get; set; } = "image_generated";
+    [Required] public string? TextPromptStreamField { get; init; } = "text_prompt";
     [Required] public string? TestStream { get; init; } = "test";
     [Required] public string? ConsumerGroupName { get; set; } = "image_upload_consumers";
 
