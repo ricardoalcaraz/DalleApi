@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package dalle;
+
+service DalleImageGenerator {
+  rpc GetImage(TextRequest) returns (ImageResponse) {}
+  rpc GetImageStream(TextRequest) returns (stream ImageResponse) {}
+}
+
+// Points are represented as latitude-longitude pairs in the E7 representation
+// (degrees multiplied by 10**7 and rounded to the nearest integer).
+// Latitudes should be in the range +/- 90 degrees and longitude should be in
+// the range +/- 180 degrees (inclusive).
+message TextRequest {
+  int32 Seed = 1;
+  string Prompt = 2;
+  string ReferenceId = 3;
+}
+
+// A latitude-longitude rectangle, represented as two diagonally opposite
+// points "lo" and "hi".
+message ImageResponse {
+  string ReferenceId = 1;
+  bytes Image = 2;
+}

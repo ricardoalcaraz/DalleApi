@@ -28,12 +28,6 @@ builder.Services.AddTransient(sp => sp.GetRequiredService<ConnectionMultiplexer>
 var app = builder.Build();
 var redisOptions = app.Services.GetRequiredService<IOptions<RedisOptions>>().Value;
 
-var db = app.Services.GetRequiredService<IDatabase>();
-
-var message = db.StreamAdd(redisOptions.StreamName, redisOptions.TestStream, "This is a test"); 
-var info = db.StreamInfo(redisOptions.TextPromptStream);
-app.Logger.LogInformation("FirstId: {FirstId}, LastId: {LastId}, Length: {Length}", info.FirstEntry.Id, info.LastEntry.Id, info.Length);
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
