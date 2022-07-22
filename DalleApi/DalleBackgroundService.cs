@@ -23,23 +23,41 @@ public class DalleBackgroundService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var proc = new Process {
+        using var proc = new Process {
             StartInfo = new ProcessStartInfo {
                 FileName = "/bin/python",
-                Arguments = "",
+                Arguments = "/home/ralcaraz/RiderProjects/min-dalle/redis_stream.py --redis-host ''",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true
             }
         };
+        proc.Start();
+
         while (!stoppingToken.IsCancellationRequested)
         {
+            while (await proc.StandardOutput.ReadLineAsync() is { } output)
+            {
+                _logger.LogInformation("{Out}", output);
+            }
+            
             _logger.LogInformation("Doing very important stuff...");
 
-            await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
+            await Task.Delay(TimeSpan.FromMilliseconds(100), stoppingToken);
         }
 
-        _logger.LogInformation("Oops, cancellation was requested!");
+        try
+        {
+            _logger.LogInformation("Cancellation was requested, killing python program");
+            var timeout = new CancellationTokenSource(100);
+            timeout.Token.ThrowIfCancellationRequested();
+            await proc.WaitForExitAsync(timeout.Token);
+        }
+        catch (TaskCanceledException)
+        {
+            _logger.LogWarning("Python app failed to stop in time, killing forcefully");
+            proc.Kill();
+        }
     }
 
     private void OnStarted()

@@ -5,6 +5,10 @@ using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
+if (!File.Exists("/bin/python"))
+{
+    throw new ApplicationException("Cannot run without python");
+}
 // Add services to the container.
 
 builder.Services.AddControllers();
